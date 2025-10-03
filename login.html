@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - SchoolMS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <img src="image/school-management-system-logo.png" alt="School Logo" class="logo-img">
+  </div>
+  <nav>
+    <ul>
+      <li><a href="home.html">Home</a></li>
+      <li><a href="register.html">Register</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div class="login-container">
+  <h2>Login</h2>
+  <form id="loginForm">
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" required>
+
+    <button type="submit" class="btn">Login</button>
+  </form>
+  <p>Don't have an account? <a href="register.html">Register here</a></p>
+  <p id="errorMsg" style="color:red; margin-top:10px;"></p>
+</div>
+
+<script>
+const loginForm = document.getElementById('loginForm');
+const errorMsg = document.getElementById('errorMsg');
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+   const response = await fetch('http://localhost:8080/schoolmanagementsystem/user/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+});
+
+    if (!response.ok) {
+    const errorText = await response.text();
+    alert("Registration failed: " + errorText);
+    return;
+}
+
+
+    const user = await response.json();
+    localStorage.setItem('currentUser', JSON.stringify(user));
+
+    // Redirect based on role
+    switch(user.userType) {
+      case "STUDENT":
+        window.location.href = "student-dashboard.html";
+        break;
+      case "LECTURER":
+        window.location.href = "lecturer-dashboard.html";
+        break;
+      default:
+        errorMsg.textContent = "Unknown user role.";
+    }
+
+  } catch (err) {
+    console.error(err);
+    errorMsg.textContent = "Error connecting to the server.";
+  }
+});
+</script>
+</body>
+</html>
