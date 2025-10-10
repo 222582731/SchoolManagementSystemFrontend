@@ -1,16 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - SchoolMS</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - SchoolMS</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .login-container {
+    max-width:400px;
+    margin:50px auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 3px 6px rgba(0,0,0,0.1);
+  }
+  input, button {
+    width:100%;
+    margin:8px 0;
+    padding:8px;
+    border-radius:5px;
+    border:1px solid #ccc;
+  }
+  button {
+    background:#2980b9;
+    color:white;
+    border:none;
+    cursor:pointer;
+  }
+  #errorMsg { color:red; margin-top:10px; }
+</style>
 </head>
 <body>
+
 <header>
-  <div class="logo">
-    <img src="image/school-management-system-logo.png" alt="School Logo" class="logo-img">
-  </div>
+  <div class="logo"><img src="image/school-management-system-logo.png" alt="Logo" class="logo-img"></div>
   <nav>
     <ul>
       <li><a href="home.html">Home</a></li>
@@ -24,45 +47,62 @@
   <form id="loginForm">
     <label for="email">Email:</label>
     <input type="email" id="email" required>
-
     <label for="password">Password:</label>
     <input type="password" id="password" required>
-
-    <button type="submit" class="btn">Login</button>
+    <button type="submit">Login</button>
   </form>
   <p>Don't have an account? <a href="register.html">Register here</a></p>
-  <p id="errorMsg" style="color:red; margin-top:10px;"></p>
+  <p id="errorMsg"></p>
 </div>
 
 <script>
 const loginForm = document.getElementById('loginForm');
 const errorMsg = document.getElementById('errorMsg');
 
+// Ensure there is a default admin in localStorage
+if(!localStorage.getItem('users')){
+  const defaultAdmin = {
+    name:"Admin User",
+    email:"admin@cput.ac.za",
+    password:"admin123",
+    userType:"ADMIN"
+  };
+  localStorage.setItem('users', JSON.stringify([defaultAdmin]));
+}
+
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
+  // 1️⃣ Check admin in frontend first
+  const allUsers = JSON.parse(localStorage.getItem('users')) || [];
+  const adminUser = allUsers.find(u => u.email === email && u.password === password && u.userType === "ADMIN");
+
+  if (adminUser) {
+    localStorage.setItem('currentUser', JSON.stringify(adminUser));
+    window.location.href = "admin-dashboard.html";
+    return; // Stop here, admin is logged in
+  }
+
+  // 2️⃣ Backend login for students and lecturers
   try {
-   const response = await fetch('http://localhost:8080/schoolmanagementsystem/user/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-});
+    const response = await fetch('http://localhost:8080/schoolmanagementsystem/user/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
 
     if (!response.ok) {
-    const errorText = await response.text();
-    alert("Registration failed: " + errorText);
-    return;
-}
-
+      const errText = await response.text();
+      throw new Error(errText || "Invalid credentials");
+    }
 
     const user = await response.json();
     localStorage.setItem('currentUser', JSON.stringify(user));
 
     // Redirect based on role
-    switch(user.userType) {
+    switch(user.userType){
       case "STUDENT":
         window.location.href = "student-dashboard.html";
         break;
@@ -70,12 +110,12 @@ loginForm.addEventListener('submit', async (e) => {
         window.location.href = "lecturer-dashboard.html";
         break;
       default:
-        errorMsg.textContent = "Unknown user role.";
+        throw new Error("Unknown user role");
     }
 
-  } catch (err) {
+  } catch(err) {
     console.error(err);
-    errorMsg.textContent = "Error connecting to the server.";
+    errorMsg.textContent = err.message || "Error connecting to the server.";
   }
 });
 </script>

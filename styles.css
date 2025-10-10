@@ -197,3 +197,69 @@ footer {
 .login-container p a:hover, .auth-container p a:hover {
   text-decoration: underline;
 }
+
+/* Contact Section */
+.contact {
+  max-width: 600px;
+  margin: 60px auto;
+  padding: 40px 30px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.contact h2 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.contact p {
+  font-size: 1rem;
+  margin-bottom: 25px;
+  color: #555;
+}
+
+.contact form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact form input,
+.contact form textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  resize: none;
+}
+
+.contact form input:focus,
+.contact form textarea:focus {
+  outline: none;
+  border-color: #1abc9c;
+  box-shadow: 0 0 5px rgba(26, 188, 156, 0.3);
+}
+
+.contact form .btn {
+  padding: 12px 25px;
+  background: #1abc9c;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.contact form .btn:hover {
+  background: #16a085;
+}
+
+#successMsg {
+  font-weight: bold;
+  margin-top: 15px;
+}
